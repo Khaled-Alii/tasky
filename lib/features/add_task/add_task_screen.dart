@@ -6,8 +6,8 @@ import 'package:to_do/models/task_model.dart';
 import 'package:to_do/core/widgets/custom_text_field_widget.dart';
 import 'package:uuid/uuid.dart';
 
-import '../core/widgets/confirm_button_widget.dart';
-import 'main_screen.dart';
+import '../../core/widgets/confirm_button_widget.dart';
+import '../navigation/main_screen.dart';
 
 class AddTask extends StatefulWidget {
   const AddTask({super.key});

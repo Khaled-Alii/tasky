@@ -5,7 +5,8 @@ import 'package:to_do/core/services/storage_manager.dart';
 import 'package:to_do/core/widgets/confirm_button_widget.dart';
 import 'package:to_do/core/widgets/custom_text_field_widget.dart';
 
-import 'main_screen.dart';
+import '../../core/constants/storage_key.dart' show StorageKey;
+import '../navigation/main_screen.dart';
 
 class WelcomeScreen extends StatelessWidget {
   WelcomeScreen({super.key});
@@ -98,9 +99,9 @@ class WelcomeScreen extends StatelessWidget {
                       ConfirmButtonWidget(
                         confirmAction: () async {
                           if (_key.currentState!.validate()) {
-                            await StorageManager().write('isFirstTime', false);
+                            await StorageManager().write(StorageKey.isFirstTime, false);
                             await StorageManager().write(
-                              'username',
+                              StorageKey.userName,
                               cont.text.trim(),
                             );
                             Get.off(() => MainScreen());

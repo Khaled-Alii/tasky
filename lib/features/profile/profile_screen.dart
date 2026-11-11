@@ -1,15 +1,15 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get_storage/get_storage.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:to_do/core/constants/storage_key.dart';
 import 'package:to_do/core/controller/theme_controller.dart';
 import 'package:to_do/core/widgets/custom_alert_dialog_widget.dart';
-import 'package:to_do/screens/user_details_screen.dart';
-import 'package:to_do/screens/welcome_screen.dart';
-import '../core/services/storage_manager.dart';
-import '../core/services/user_details_service.dart';
+import 'package:to_do/features/profile/user_details_screen.dart';
+import 'package:to_do/features/welcome/welcome_screen.dart';
+import '../../core/services/storage_manager.dart';
+import '../../core/services/user_details_service.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -29,8 +29,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     // TODO: implement initState
     super.initState();
     getUserInfo();
-    // getThemeMode();
-    getUserPic();
   }
 
   void getUserInfo() {
@@ -38,10 +36,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
     motivationQuote.value = UserDetailsService(
       StorageManager(),
     ).getUserMotivationQuote();
+    getUserPic();
   }
 
   void getUserPic() {
-    final path = StorageManager().read('profile_picture');
+    final path = UserDetailsService(StorageManager()).getUserProfilePicture();
     if (path != null && File(path).existsSync()) {
       profilePicture.value = File(path);
     }
@@ -143,14 +142,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 );
                 if (result == null) return;
                 result = result as Map<String, String>;
-                userName.value = result['username']!;
-                motivationQuote.value = result['MotivationQuote']!;
+                userName.value = result[StorageKey.userName]!;
+                motivationQuote.value = result[StorageKey.motivationQuote]!;
                 await UserDetailsService(
                   StorageManager(),
-                ).setUserName(result['username']!);
+                ).setUserName(result[StorageKey.userName]!);
                 await UserDetailsService(
                   StorageManager(),
-                ).setUserMotivationQuote(result['MotivationQuote']!);
+                ).setUserMotivationQuote(result[StorageKey.motivationQuote]!);
               },
               contentPadding: EdgeInsets.only(left: 0),
               leading: Icon(Icons.person_outline),
@@ -169,7 +168,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   onChanged: (value) async {
                     isDarkMode.toggle();
                     ThemeController().toggle();
-                    StorageManager().write('isDarkMode', isDarkMode.value);
+                    StorageManager().write(StorageKey.isDarkMode, isDarkMode.value);
                   },
                 );
               }),
@@ -197,7 +196,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> _logout() async {
     // Erase all user data from default storage and reset first-time flag
     await StorageManager().erase();
-    await StorageManager().write('isFirstTime', true);
+    await StorageManager().write(StorageKey.isFirstTime, true);
 
     // Clear the whole navigation stack and redirect to WelcomeScreen
     Get.offAll(() => WelcomeScreen());
@@ -254,7 +253,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       final newPath = '${appDir.path}/${picker.name}';
       await File(picker.path).copy(newPath);
       profilePicture.value = File(newPath);
-      StorageManager().write('profile_picture', newPath);
+      await UserDetailsService(StorageManager()).setUserProfilePicture(newPath);
     }
   }
 }

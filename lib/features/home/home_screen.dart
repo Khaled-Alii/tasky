@@ -3,14 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
-import 'package:to_do/screens/add_task_screen.dart';
+import 'package:to_do/core/constants/storage_key.dart';
+import 'package:to_do/features/add_task/add_task_screen.dart';
 import 'package:to_do/core/services/user_details_service.dart';
-import 'package:to_do/screens/high_priority_tasks_screen.dart';
-import 'package:to_do/widgets/achieved_tasks_widget.dart';
-import 'package:to_do/widgets/task_list_widget.dart';
-import '../core/controller/theme_controller.dart';
-import '../core/services/storage_manager.dart';
-import '../models/task_model.dart';
+import 'package:to_do/features/tasks/high_priority_tasks_screen.dart';
+import 'package:to_do/features/home/componants/achieved_tasks_widget.dart';
+import 'package:to_do/core/componants/task_list_widget.dart';
+import '../../core/controller/theme_controller.dart';
+import '../../core/services/storage_manager.dart';
+import '../../models/task_model.dart';
 import 'dart:io';
 
 class HomeScreen extends StatefulWidget {
@@ -42,7 +43,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void getUserPic() {
-    final path = StorageManager().read('profile_picture');
+    final path = UserDetailsService(StorageManager()).getUserProfilePicture();
     if (path != null && File(path).existsSync()) {
       profilePicture.value = File(path);
     }
@@ -145,7 +146,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             isDarkMode.toggle();
                             ThemeController().toggle();
                             StorageManager().write(
-                              'isDarkMode',
+                              StorageKey.isDarkMode,
                               isDarkMode.value,
                             );
                           },

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:to_do/core/widgets/custom_alert_dialog_widget.dart';
-import '../core/controller/theme_controller.dart';
-import '../core/enums/task_details_option_enum.dart';
-import '../core/widgets/confirm_button_widget.dart';
-import '../core/widgets/custom_text_field_widget.dart';
-import '../models/task_model.dart';
+import '../controller/theme_controller.dart';
+import '../enums/task_details_option_enum.dart';
+import '../widgets/confirm_button_widget.dart';
+import '../widgets/custom_text_field_widget.dart';
+import '../../models/task_model.dart';
 
 class TaskListWidget extends StatelessWidget {
   const TaskListWidget({
@@ -131,7 +131,7 @@ class TaskItemWidget extends StatelessWidget {
   });
 
   final Task task;
-  final ValueChanged<bool?> onToggle;
+  final void Function(bool?) onToggle;
 
   final Function(String? id) deleteTask;
   final Future<void> Function({
@@ -214,7 +214,8 @@ class TaskItemWidget extends StatelessWidget {
     await showModalBottomSheet(
       elevation: 5,
       context: context,
-      isScrollControlled: true, // ضروري للتمدد مع الكيبورد
+      isScrollControlled: true,
+      // ضروري للتمدد مع الكيبورد
       constraints: BoxConstraints(
         // أقصى طول مسموح به 90% من الشاشة (حتى لا يغطي الـ Status Bar)
         maxHeight: MediaQuery.of(context).size.height * 0.9,
@@ -269,7 +270,9 @@ class TaskItemWidget extends StatelessWidget {
                           children: [
                             Text(
                               "High Priority",
-                              style: Theme.of(sheetContext).textTheme.displayMedium,
+                              style: Theme.of(
+                                sheetContext,
+                              ).textTheme.displayMedium,
                             ),
                             Obx(() {
                               return Switch(

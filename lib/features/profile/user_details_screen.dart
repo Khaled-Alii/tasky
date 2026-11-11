@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:to_do/core/constants/storage_key.dart';
 import 'package:to_do/core/services/user_details_service.dart';
 
-import '../core/services/storage_manager.dart';
-import '../core/widgets/confirm_button_widget.dart';
-import '../core/widgets/custom_text_field_widget.dart';
+import '../../core/services/storage_manager.dart';
+import '../../core/widgets/confirm_button_widget.dart';
+import '../../core/widgets/custom_text_field_widget.dart';
 
 class UserDetailsScreen extends StatefulWidget {
   const UserDetailsScreen({super.key});
@@ -22,8 +23,12 @@ class _UserDetailsScreenState extends State<UserDetailsScreen> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    userNameController.text = UserDetailsService(StorageManager()).getUserName();
-    motivationController.text = UserDetailsService(StorageManager()).getUserMotivationQuote();
+    userNameController.text = UserDetailsService(
+      StorageManager(),
+    ).getUserName();
+    motivationController.text = UserDetailsService(
+      StorageManager(),
+    ).getUserMotivationQuote();
   }
 
   @override
@@ -84,8 +89,9 @@ class _UserDetailsScreenState extends State<UserDetailsScreen> {
                     if (_key.currentState!.validate()) {
                       Get.back(
                         result: {
-                          'username': userNameController.text.trim(),
-                          'MotivationQuote': motivationController.text.trim(),
+                          StorageKey.userName: userNameController.text.trim(),
+                          StorageKey.motivationQuote: motivationController.text
+                              .trim(),
                         },
                       );
                     }

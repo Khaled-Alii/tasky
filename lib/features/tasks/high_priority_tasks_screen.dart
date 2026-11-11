@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:to_do/core/services/storage_manager.dart';
-import 'package:to_do/widgets/task_list_widget.dart';
+import 'package:to_do/core/componants/task_list_widget.dart';
 
-import '../models/task_model.dart';
+import '../../models/task_model.dart';
 
 class HighPriorityTasksScreen extends StatefulWidget {
   const HighPriorityTasksScreen({super.key});
