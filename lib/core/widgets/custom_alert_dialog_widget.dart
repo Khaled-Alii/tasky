@@ -21,7 +21,7 @@ class CustomAlertDialogWidget extends StatelessWidget {
     required String title,
     required String content,
     required String actionText,
-    required VoidCallback action,
+    required Function action,
   }) async {
     showDialog(
       context: context,

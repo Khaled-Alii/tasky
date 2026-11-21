@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:provider/provider.dart';
 import 'package:to_do/core/widgets/custom_alert_dialog_widget.dart';
+import 'package:to_do/features/task_controller.dart';
 import '../controller/theme_controller.dart';
 import '../enums/task_details_option_enum.dart';
 import '../widgets/confirm_button_widget.dart';
@@ -12,7 +13,6 @@ class TaskListWidget extends StatelessWidget {
     super.key,
     required this.tasks,
     required this.isLoading,
-    required this.saveTasks,
     this.isSliver = false,
   });
 
@@ -21,136 +21,102 @@ class TaskListWidget extends StatelessWidget {
     super.key,
     required this.tasks,
     required this.isLoading,
-    required this.saveTasks,
   }) : isSliver = true;
 
-  final RxList<Task> tasks;
-  final RxBool isLoading;
-  final Function saveTasks;
+  final List<Task> tasks;
+  final bool isLoading;
   final bool isSliver;
 
-  Future<void> deleteTask(String? id) async {
-    if (id == null) return;
-    tasks.removeWhere((t) => t.id == id);
-    saveTasks();
-  }
-
-  Future<void> editTask({
-    required Task task,
-    required TextEditingController name,
-    required TextEditingController desc,
-    required bool highPriority,
-  }) async {
-    // تحديث بيانات المهمة بالقيم الجديدة الراجعة من شاشة التعديل
-    task.name = name.text.trim();
-    task.description = desc.text.trim();
-    task.highPriority = highPriority;
-    tasks.refresh();
-    await saveTasks();
-  }
+  // late final Function saveTasks;
 
   @override
   Widget build(BuildContext context) {
-    return Obx(() {
-      // 1. حالة التحميل
-      if (isLoading.value) {
-        const loader = Center(
-          child: CircularProgressIndicator(color: Colors.white),
-        );
-        return isSliver
-            ? const SliverToBoxAdapter(
-                child: Padding(
-                  padding: EdgeInsets.symmetric(vertical: 40),
-                  child: loader,
-                ),
-              )
-            : loader;
-      }
-
-      // 2. حالة القائمة فارغة
-      if (tasks.isEmpty) {
-        final emptyText = Center(
-          child: Text(
-            'No Tasks Yet..',
-            style: Theme.of(
-              context,
-            ).textTheme.displayLarge!.copyWith(fontSize: 32),
-          ),
-        );
-        return isSliver
-            ? SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 40),
-                  child: emptyText,
-                ),
-              )
-            : emptyText;
-      }
-
-      // 3. حالة وجود مهام (Sliver)
-      if (isSliver) {
-        return SliverPadding(
-          padding: const EdgeInsets.only(bottom: 94),
-          sliver: SliverList.builder(
-            itemCount: tasks.length,
-            itemBuilder: (ctx, index) => _buildTaskItem(tasks[index]),
-          ),
-        );
-      }
-
-      // 4. حالة وجود مهام (ListView عادي)
-      return ListView.builder(
-        padding: const EdgeInsets.only(bottom: 94),
-        itemCount: tasks.length,
-        itemBuilder: (ctx, index) => _buildTaskItem(tasks[index]),
+    // 1. حالة التحميل
+    if (isLoading) {
+      const loader = Center(
+        child: CircularProgressIndicator(color: Colors.white),
       );
-    });
+      return isSliver
+          ? const SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.symmetric(vertical: 40),
+                child: loader,
+              ),
+            )
+          : loader;
+    }
+
+    // 2. حالة القائمة فارغة
+    if (tasks.isEmpty) {
+      final emptyText = Center(
+        child: Text(
+          'No Tasks Yet..',
+          style: Theme.of(
+            context,
+          ).textTheme.displayLarge!.copyWith(fontSize: 32),
+        ),
+      );
+      return isSliver
+          ? SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 40),
+                child: emptyText,
+              ),
+            )
+          : emptyText;
+    }
+
+    // 3. حالة وجود مهام (Sliver)
+    if (isSliver) {
+      return SliverPadding(
+        padding: const EdgeInsets.only(bottom: 94),
+        sliver: SliverList.builder(
+          itemCount: tasks.length,
+          itemBuilder: (ctx, index) => _buildTaskItem(tasks[index]),
+        ),
+      );
+    }
+
+    // 4. حالة وجود مهام (ListView عادي)
+    return ListView.builder(
+      padding: const EdgeInsets.only(bottom: 94),
+      itemCount: tasks.length,
+      itemBuilder: (ctx, index) => _buildTaskItem(tasks[index]),
+    );
   }
 
   Widget _buildTaskItem(Task task) {
-    return TaskItemWidget(
-      task: task,
-      onToggle: (bool? v) {
-        task.isDone = v ?? false;
-        saveTasks();
-      },
-      deleteTask: deleteTask,
-      editTask: editTask,
-    );
+    return TaskItemWidget(task: task);
   }
 }
 
 /// ويدجت مستقل لشكل المهمة الواحدة (يمنع تكرار الكود)
 class TaskItemWidget extends StatelessWidget {
-  TaskItemWidget({
-    super.key,
-    required this.task,
-    required this.onToggle,
-    required this.deleteTask,
-    required this.editTask,
-  });
+  const TaskItemWidget({super.key, required this.task});
 
   final Task task;
-  final void Function(bool?) onToggle;
 
-  final Function(String? id) deleteTask;
-  final Future<void> Function({
-    required Task task,
-    required TextEditingController name,
-    required TextEditingController desc,
-    required bool highPriority,
-  })
-  editTask;
+  // final Future<void> Function({
+  //   required Task task,
+  //   required TextEditingController name,
+  //   required TextEditingController desc,
+  //   required bool highPriority,
+  // })
+  // editTask;
 
-  final details = TaskDetailsOptionEnum.values
+  static final details = TaskDetailsOptionEnum.values
       .map((e) => PopupMenuItem(value: e, child: Text(e.name)))
       .toList();
 
   @override
   Widget build(BuildContext context) {
+    final controller = context.read<TaskController>();
     return Card(
       child: ListTile(
-        leading: Checkbox(value: task.isDone, onChanged: onToggle),
+        leading: Checkbox(
+          value: task.isDone,
+          onChanged: (value) => controller.toggleTask(task, value ?? false),
+        ),
         title: Text(
           task.name,
           style: task.isDone
@@ -181,7 +147,7 @@ class TaskItemWidget extends StatelessWidget {
                   title: 'Delete',
                   content: 'Are you sure you want to delete task?',
                   actionText: 'Delete',
-                  action: () => deleteTask(task.id),
+                  action: () => controller.deleteTask,
                 );
                 break;
             }
@@ -209,7 +175,7 @@ class TaskItemWidget extends StatelessWidget {
     final key = GlobalKey<FormState>();
     final taskNameController = TextEditingController(text: task.name);
     final descriptionController = TextEditingController(text: task.description);
-    final highPriority = task.highPriority.obs;
+    final isHighPriority = ValueNotifier<bool>(task.highPriority);
 
     await showModalBottomSheet(
       elevation: 5,
@@ -223,6 +189,7 @@ class TaskItemWidget extends StatelessWidget {
         minHeight: MediaQuery.of(context).size.height * 0.5,
       ),
       builder: (sheetContext) {
+        final controller = sheetContext.read<TaskController>();
         return Padding(
           // 1. السر هنا: إضافة ارتفاع الكيبورد للـ Padding السفلي باستخدام sheetContext
           padding: EdgeInsets.only(
@@ -274,14 +241,17 @@ class TaskItemWidget extends StatelessWidget {
                                 sheetContext,
                               ).textTheme.displayMedium,
                             ),
-                            Obx(() {
-                              return Switch(
-                                value: highPriority.value,
-                                onChanged: (value) {
-                                  highPriority.value = value;
-                                },
-                              );
-                            }),
+                            ValueListenableBuilder<bool>(
+                              valueListenable: isHighPriority,
+                              builder: (context, currentValue, _) {
+                                return Switch(
+                                  value: currentValue,
+                                  onChanged: (value) {
+                                    isHighPriority.value = value;
+                                  },
+                                );
+                              },
+                            ),
                           ],
                         ),
                       ],
@@ -292,13 +262,15 @@ class TaskItemWidget extends StatelessWidget {
                 ConfirmButtonWidget(
                   confirmAction: () async {
                     if (key.currentState!.validate()) {
-                      await editTask(
+                      await controller.editTask(
                         task: task,
-                        name: taskNameController,
-                        desc: descriptionController,
-                        highPriority: highPriority.value,
+                        name: taskNameController.text.trim(),
+                        desc: descriptionController.text.trim(),
+                        highPriority: isHighPriority.value,
                       );
-                      Get.back();
+                      if (sheetContext.mounted) {
+                        Navigator.of(sheetContext).pop();
+                      }
                     }
                   },
                   labelText: 'Confirm Task',
@@ -310,5 +282,8 @@ class TaskItemWidget extends StatelessWidget {
         );
       },
     );
+    taskNameController.dispose();
+    descriptionController.dispose();
+    isHighPriority.dispose();
   }
 }

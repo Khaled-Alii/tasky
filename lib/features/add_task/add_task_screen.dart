@@ -1,29 +1,26 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:to_do/core/constants/storage_key.dart';
 import 'package:to_do/core/services/storage_manager.dart';
 import 'package:to_do/models/task_model.dart';
 import 'package:to_do/core/widgets/custom_text_field_widget.dart';
 import 'package:uuid/uuid.dart';
-
 import '../../core/widgets/confirm_button_widget.dart';
-import '../navigation/main_screen.dart';
 
-class AddTask extends StatefulWidget {
-  const AddTask({super.key});
+class AddTaskScreen extends StatefulWidget {
+  const AddTaskScreen({super.key});
 
   @override
-  State<AddTask> createState() => _AddTaskState();
+  State<AddTaskScreen> createState() => _AddTaskScreenState();
 }
 
-class _AddTaskState extends State<AddTask> {
+class _AddTaskScreenState extends State<AddTaskScreen> {
   final _key = GlobalKey<FormState>();
 
   final taskNameController = TextEditingController();
 
   final descriptionController = TextEditingController();
-
-  RxBool highPriority = true.obs;
+  final highPriority = ValueNotifier<bool>(true);
 
   Future<void> addTask() async {
     if (_key.currentState?.validate() ?? false) {
@@ -38,10 +35,14 @@ class _AddTaskState extends State<AddTask> {
       ).toJson();
 
       ///To Do make it when back
-      final List<dynamic> currentList = StorageManager().read('tasks') ?? [];
+      final List<dynamic> currentList =
+          StorageManager().read(StorageKey.tasks) ?? [];
       currentList.add(task);
-      await StorageManager().write('tasks', currentList);
-      Get.back(result: true);
+      await StorageManager().write(StorageKey.tasks, currentList);
+
+      if (context.mounted) {
+        Navigator.pop(context);
+      }
     }
   }
 
@@ -100,14 +101,18 @@ class _AddTaskState extends State<AddTask> {
                               "High Priority",
                               style: Theme.of(context).textTheme.displayMedium,
                             ),
-                            Obx(() {
-                              return Switch(
-                                value: highPriority.value,
-                                onChanged: (value) {
-                                  highPriority.value = value;
-                                },
-                              );
-                            }),
+                            ValueListenableBuilder(
+                              valueListenable: highPriority,
+                              builder:
+                                  (BuildContext context, value, Widget? child) {
+                                    return Switch(
+                                      value: value,
+                                      onChanged: (value) {
+                                        highPriority.value = value;
+                                      },
+                                    );
+                                  },
+                            ),
                           ],
                         ),
                       ],

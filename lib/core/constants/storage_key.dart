@@ -4,4 +4,5 @@ class StorageKey {
   static const profilePicture = 'profile_picture';
   static const isDarkMode = 'isDarkMode';
   static const isFirstTime = 'isFirstTime';
+  static const tasks = 'tasks';
 }

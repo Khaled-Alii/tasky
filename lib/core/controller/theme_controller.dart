@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:to_do/core/constants/storage_key.dart';
 
 import '../services/storage_manager.dart';
 
@@ -8,7 +9,7 @@ class ThemeController {
   );
 
   void init() {
-    final isDarkMode = StorageManager().read('isDarkMode');
+    final isDarkMode = StorageManager().read(StorageKey.isDarkMode);
     valueNotifier.value = isDarkMode == null
         ? ThemeMode.dark
         : (isDarkMode ? ThemeMode.dark : ThemeMode.light);

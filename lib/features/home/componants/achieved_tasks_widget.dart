@@ -1,22 +1,24 @@
 import 'dart:math';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class AchievedTasksWidget extends StatelessWidget {
   const AchievedTasksWidget({
     super.key,
-    required RxDouble percentage,
-    required RxInt totalDoneTasks,
-    required RxInt totalTasks,
+    required double percentage,
+    required int totalDoneTasks,
+    required int totalTasks,
   }) : _percentage = percentage,
        _totalDoneTasks = totalDoneTasks,
        _totalTasks = totalTasks;
-  final RxDouble _percentage;
-  final RxInt _totalDoneTasks, _totalTasks;
+  final double _percentage;
+  final int _totalDoneTasks, _totalTasks;
 
   @override
   Widget build(BuildContext context) {
+    final percentage = ValueNotifier<double>(_percentage);
     return Card(
       margin: EdgeInsets.all(0),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
@@ -28,14 +30,12 @@ class AchievedTasksWidget extends StatelessWidget {
             'Achieved Tasks',
             style: Theme.of(context).textTheme.displayMedium,
           ),
-          subtitle: Obx(() {
-            return Text(
-              '$_totalDoneTasks Out of $_totalTasks Done',
+          subtitle: Text(
+            '$_totalDoneTasks Out of $_totalTasks Done',
 
-              // style:
-              // Theme.of(context).textTheme.displaySmall!.copyWith(color: Color(0xFFC6C6C6))
-            );
-          }),
+            // style:
+            // Theme.of(context).textTheme.displaySmall!.copyWith(color: Color(0xFFC6C6C6))
+          ),
           trailing: Stack(
             alignment: Alignment.center,
             children: [
@@ -44,19 +44,26 @@ class AchievedTasksWidget extends StatelessWidget {
                 width: 48,
                 child: Transform.rotate(
                   angle: -pi / 2,
-                  child: Obx(() {
-                    return CircularProgressIndicator(value: _percentage.value);
-                  }),
+                  child: ValueListenableBuilder<double>(
+                    valueListenable: percentage,
+                    builder:
+                        (
+                          BuildContext context,
+                          double percentage,
+                          Widget? child,
+                        ) {
+                          return CircularProgressIndicator(value: percentage);
+                        },
+                  ),
                 ),
               ),
-              Obx(() {
-                return Text(
-                  '${(_percentage * 100).toInt()}%',
-                  style: Theme.of(context).textTheme.displaySmall!.copyWith(
-                    fontWeight: FontWeight.w500,
-                  ),
-                );
-              }),
+
+              Text(
+                '${(_percentage * 100).toInt()}%',
+                style: Theme.of(
+                  context,
+                ).textTheme.displaySmall!.copyWith(fontWeight: FontWeight.w500),
+              ),
             ],
           ),
         ),

@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:provider/provider.dart';
 import 'package:to_do/core/constants/storage_key.dart';
 import 'package:to_do/core/controller/theme_controller.dart';
 import 'package:to_do/core/services/storage_manager.dart';
 import 'package:to_do/features/navigation/main_screen.dart';
+import 'package:to_do/features/task_controller.dart';
 import 'package:to_do/features/welcome/welcome_screen.dart';
 import 'core/theme/dark_theme.dart';
 import 'core/theme/light_theme.dart';
@@ -15,7 +16,12 @@ Future<void> main() async {
       StorageManager().read(StorageKey.isFirstTime) ?? true;
   ThemeController().init();
   print('is that is first time? $isFirstTime');
-  runApp(MyApp(isFirstTime: isFirstTime));
+  runApp(
+    ChangeNotifierProvider(
+      create: (BuildContext context) => TaskController()..init(),
+      child: MyApp(isFirstTime: isFirstTime),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -29,7 +35,7 @@ class MyApp extends StatelessWidget {
     return ValueListenableBuilder<ThemeMode>(
       valueListenable: value,
       builder: (BuildContext context, ThemeMode value, Widget? child) {
-        return GetMaterialApp(
+        return MaterialApp(
           darkTheme: darkTheme,
           theme: lightTheme,
           themeMode: value,
